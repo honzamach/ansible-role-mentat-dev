@@ -1,0 +1,82 @@
+---
+
+- name: Creating local user account for Mentat system
+  user:
+    name: "{{ hm_mentat_dev__user }}"
+    shell: /bin/bash
+
+- name: Creating local user group for Mentat system
+  group:
+    name: "{{ hm_mentat_dev__group }}"
+    state: present
+
+- name: Installing custom APT repository GPG key for NodeJS
+  apt_key:
+    url: https://deb.nodesource.com/gpgkey/nodesource.gpg.key
+    state: present
+
+- name: Installing custom APT repository GPG key for Yarn
+  apt_key:
+    url: https://dl.yarnpkg.com/debian/pubkey.gpg
+    state: present
+
+- name: Adding custom APT repository for NodeJS
+  apt_repository:
+    repo: "deb https://deb.nodesource.com/node_8.x {{ ansible_lsb['codename'] }} main"
+    state: present
+    filename: nodesource
+    update_cache: yes
+
+- name: Adding custom source APT repository for NodeJS
+  apt_repository:
+    repo: "deb-src https://deb.nodesource.com/node_8.x {{ ansible_lsb['codename'] }} main"
+    state: present
+    filename: nodesource-src
+    update_cache: yes
+
+- name: Adding custom APT repository for Yarn
+  apt_repository:
+    repo: "deb https://dl.yarnpkg.com/debian/ stable main"
+    state: present
+    filename: yarn
+    update_cache: yes
+
+- name: Installing packages
+  apt:
+    name: "{{ hm_mentat_dev__package_list }}"
+    state: latest
+    update_cache: "{{ hm_mentat_dev__apt_force_update }}"
+
+- name: Installing Grunt automation tool
+  shell: npm install grunt-cli -g
+  args:
+    chdir: /tmp
+    creates: /usr/local/bin/grunt
+
+- name: Managing Ansible workspace and cache on remote server
+  file:
+    path: /etc/ansible/mentat
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Installing Mentat from Git repository
+  git:
+    repo: "{{ hm_mentat_dev__repo_url }}"
+    dest: "{{ hm_mentat_dev__install_path }}"
+    version: "{{ hm_mentat_dev__repo_branch }}"
+    recursive: yes
+    accept_hostkey: yes
+
+- name: Installing virtual environment
+  shell: make venv
+  args:
+    chdir: "{{ hm_mentat_dev__install_path }}"
+    creates: "{{ hm_mentat_dev__install_path }}/venv"
+
+- name: Installing development environment
+  shell: ". venv/bin/activate && make develop"
+  args:
+    chdir: "{{ hm_mentat_dev__install_path }}"
+  changed_when: false

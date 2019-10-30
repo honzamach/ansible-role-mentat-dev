@@ -1,0 +1,165 @@
+---
+
+- name: "Workaround: linking Mentat config directory to /etc/mentat"
+  file:
+    src: "{{ hm_mentat_dev__install_path }}/conf"
+    dest: /etc/mentat
+    state: link
+
+- name: Configuring Apache redirection site for Hawat web interface
+  template:
+    src: "{{ item }}"
+    dest: /etc/apache2/sites-available/site_mentat_redirect.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  with_first_found:
+    - "inventory/host_files/{{ inventory_hostname }}/honzamach.mentat_dev/apache2_site_mentat_redirect.conf.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.mentat_dev/apache2_site_mentat_redirect.conf.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.mentat_dev/apache2_site_mentat_redirect.conf.j2"
+    - "inventory/group_files/servers/honzamach.mentat_dev/apache2_site_mentat_redirect.conf.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers/honzamach.mentat_dev/apache2_site_mentat_redirect.conf.j2"
+    - "apache2_site_mentat_redirect.conf.{{ ansible_lsb['codename'] }}.j2"
+    - "apache2_site_mentat_redirect.conf.j2"
+  notify:
+    - Restart web server service
+
+- name: Configuring Apache site for Hawat web interface
+  template:
+    src: "{{ item }}"
+    dest: /etc/apache2/sites-available/site_mentat-ng.conf
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  with_first_found:
+    - "inventory/host_files/{{ inventory_hostname }}/honzamach.mentat_dev/apache2_site_mentat-ng.conf.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.mentat_dev/apache2_site_mentat-ng.conf.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.mentat_dev/apache2_site_mentat-ng.conf.j2"
+    - "inventory/group_files/servers/honzamach.mentat_dev/apache2_site_mentat-ng.conf.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers/honzamach.mentat_dev/apache2_site_mentat-ng.conf.j2"
+    - "apache2_site_mentat-ng.conf.{{ ansible_lsb['codename'] }}.j2"
+    - "apache2_site_mentat-ng.conf.j2"
+  notify:
+    - Restart web server service
+
+- name: Configure Apache2 linux user to mentat
+  replace:
+    path: /etc/apache2/envvars
+    regexp: '(\s+)export APACHE_RUN_USER=www-data(\s+.*)?$'
+    replace: '\1export APACHE_RUN_USER={{ hm_mentat_dev__user }}\2'
+  notify:
+    - Restart web server service
+
+- name: Configure Apache2 linux group to mentat
+  replace:
+    path: /etc/apache2/envvars
+    regexp: '(\s+)export APACHE_RUN_GROUP=www-data(\s+.*)?$'
+    replace: '\1export APACHE_RUN_GROUP={{ hm_mentat_dev__group }}\2'
+  notify:
+    - Restart web server service
+
+- name: Enabling necessary Apache2 modules
+  apache2_module:
+    state: present
+    name: "{{ item }}"
+    ignore_configcheck: True
+  with_items:
+    - rewrite
+    - ssl
+    - wsgi
+  notify:
+    - Restart web server service
+
+- name: Disabling default Apache2 sites
+  file:
+    path: "/etc/apache2/sites-enabled/{{ item }}"
+    state: absent
+  with_items:
+    - 000-default.conf
+    - default-ssl.conf
+  notify:
+    - Restart web server service
+
+- name: Enabling Apache2 redirection site for Hawat web interface
+  file:
+    src: /etc/apache2/sites-available/site_mentat_redirect.conf
+    dest: /etc/apache2/sites-enabled/site_mentat_redirect.conf
+    state: link
+  notify:
+    - Restart web server service
+
+- name: Enabling Apache2 site for Hawat web interface
+  file:
+    src: /etc/apache2/sites-available/site_mentat-ng.conf
+    dest: /etc/apache2/sites-enabled/site_mentat-ng.conf
+    state: link
+  notify:
+    - Restart web server service
+
+- name: Configuring Nagios monitoring
+  template:
+    src: "{{ item }}"
+    dest: /etc/nagios/nrpe.d/mentat.cfg
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  with_first_found:
+    - "inventory/host_files/{{ inventory_hostname }}/honzamach.mentat_dev/nrpe_mentat.cfg.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.mentat_dev/nrpe_mentat.cfg.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.mentat_dev/nrpe_mentat.cfg.j2"
+    - "inventory/group_files/servers/honzamach.mentat_dev/nrpe_mentat.cfg.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers/honzamach.mentat_dev/nrpe_mentat.cfg.j2"
+    - "nrpe_mentat.cfg.{{ ansible_lsb['codename'] }}.j2"
+    - "nrpe_mentat.cfg.j2"
+  notify: Restart NRPE service
+  when: '"servers_monitored" in group_names'
+
+- name: Configuring system status script
+  template:
+    src: "{{ item }}"
+    dest: /opt/system-status/system-status.d/40-mentat
+    owner: root
+    group: root
+    mode: 0755
+  with_first_found:
+    - "inventory/host_files/{{ inventory_hostname }}/honzamach.mentat_dev/system-status-mentat.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.mentat_dev/system-status-mentat.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers_{{ msms_server_type }}/honzamach.mentat_dev/system-status-mentat.j2"
+    - "inventory/group_files/servers/honzamach.mentat_dev/system-status-mentat.{{ ansible_lsb['codename'] }}.j2"
+    - "inventory/group_files/servers/honzamach.mentat_dev/system-status-mentat.j2"
+    - "system-status-mentat.{{ ansible_lsb['codename'] }}.j2"
+    - "system-status-mentat.j2"
+  when: '"servers_commonenv" in group_names'
+
+- name: Creating required databases
+  shell: ". venv/bin/activate && ./scripts/sqldb-init.sh && touch /etc/ansible/mentat/sqldb-init.sh.mark"
+  args:
+    chdir: "{{ hm_mentat_dev__install_path }}"
+    creates: /etc/ansible/mentat/sqldb-init.sh.mark
+
+- name: Creating database schemas and indices
+  shell: ". venv/bin/activate && mentat-dbmngr.py --command init && touch /etc/ansible/mentat/mentat-dbmngr.py.mark"
+  args:
+    chdir: "{{ hm_mentat_dev__install_path }}"
+    creates: /etc/ansible/mentat/mentat-dbmngr.py.mark
+
+- name: Stamping metadata database
+  shell: ". venv/bin/activate && hawat-cli db stamp head && touch /etc/ansible/mentat/mentat_main_stamp.mark"
+  args:
+    chdir: "{{ hm_mentat_dev__install_path }}"
+    creates: /etc/ansible/mentat/mentat_main_stamp.mark
+
+- name: Stamping event database
+  shell: ". venv/bin/activate && ./scripts/sqldb-migrate.sh stamp head && touch /etc/ansible/mentat/mentat_events_stamp.mark"
+  args:
+    chdir: "{{ hm_mentat_dev__install_path }}"
+    creates: /etc/ansible/mentat/mentat_events_stamp.mark
+
+- name: Precaching metadata
+  shell: ". venv/bin/activate && mentat-precache.py --allow-empty && touch /etc/ansible/mentat/mentat-precache.py.mark"
+  args:
+    chdir: "{{ hm_mentat_dev__install_path }}"
+    creates: /etc/ansible/mentat/mentat-precache.py.mark

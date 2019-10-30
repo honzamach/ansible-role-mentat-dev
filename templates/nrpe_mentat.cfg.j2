@@ -1,0 +1,34 @@
+#----------------------- <+++ansible-managed-file+++> -------------------------+
+#
+#                             IMPORTANT WARNING
+#
+#  This file is managed remotely by Ansible orchestration tool. Any local
+#  changes will be overwritten without any notice !!! You have been warned !!!
+#
+#----------------------- <+++ansible-managed-file+++> -------------------------+
+
+#
+# Check running processes.
+#
+command[check_mentat]={{ hm_mentat_dev__python_venv }}/bin/python {{ hm_mentat_dev__install_path }}/bin/mentat-controller.py --command status --nagios-plugin --log-level warning --shell
+
+#
+# Check event database.
+#
+command[check_mentat_edb]={{ hm_mentat_dev__python_venv }}/bin/python {{ hm_mentat_dev__install_path }}/bin/mentat-dbmngr.py --command watchdog-events --nagios-plugin --log-level warning --shell --user nagios --group nagios
+
+#
+# Check queue sizes.
+#
+command[check_mentat_inspector_a_errors_dir]=/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector.py/errors -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+command[check_mentat_inspector_a_pending_dir]=/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector.py/pending -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+command[check_mentat_inspector_a_incoming_dir]=/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector.py/incoming -w {{ hm_mentat_dev__check_queue_size['w'] }} -c {{ hm_mentat_dev__check_queue_size['c'] }}
+command[check_mentat_inspector_b_errors_dir]=/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector-b.py/errors -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+command[check_mentat_inspector_b_pending_dir]=/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector-b.py/pending -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+command[check_mentat_inspector_b_incoming_dir]=/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector-b.py/incoming -w {{ hm_mentat_dev__check_queue_size['w'] }} -c {{ hm_mentat_dev__check_queue_size['c'] }}
+command[check_mentat_enricher_errors_dir]=/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-enricher.py/errors -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+command[check_mentat_enricher_pending_dir]=/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-enricher.py/pending -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+command[check_mentat_enricher_incoming_dir]=/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-enricher.py/incoming -w {{ hm_mentat_dev__check_queue_size['w'] }} -c {{ hm_mentat_dev__check_queue_size['c'] }}
+command[check_mentat_storage_errors_dir]=/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-storage.py/errors -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+command[check_mentat_storage_pending_dir]=/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-storage.py/pending -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+command[check_mentat_storage_incoming_dir]=/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-storage.py/incoming -w {{ hm_mentat_dev__check_queue_size['w'] }} -c {{ hm_mentat_dev__check_queue_size['c'] }}

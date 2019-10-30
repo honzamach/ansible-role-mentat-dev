@@ -1,0 +1,58 @@
+#----------------------- <+++ansible-managed-file+++> -------------------------+
+#
+#                             IMPORTANT WARNING
+#
+#  This file is managed remotely by Ansible orchestration tool. Any local
+#  changes will be overwritten without any notice !!! You have been warned !!!
+#
+#----------------------- <+++ansible-managed-file+++> -------------------------+
+
+echo "+------------------------------------------------------------------------------+"
+echo "| Mentat status                                                                |"
+echo "+------------------------------------------------------------------------------+"
+
+#
+# Check running processes.
+#
+{{ hm_mentat_dev__python_venv }}/bin/python {{ hm_mentat_dev__install_path }}/bin/mentat-controller.py --command status --nagios-plugin --log-level warning | cut -f 1 -d \; | sed 's/^\s//'
+
+#
+# Check event database.
+#
+{{ hm_mentat_dev__python_venv }}/bin/python {{ hm_mentat_dev__install_path }}/bin/mentat-dbmngr.py --command watchdog-events --nagios-plugin --log-level warning --shell | cut -f 1 -d \; | sed 's/^\s//'
+
+#
+# Check queue error directory size.
+#
+echo -n "INSP A ERRS: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector.py/errors -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+echo -n "INSP A PEND: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector.py/pending -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+echo -n "INSP A INCM: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector.py/incoming -w {{ hm_mentat_dev__check_queue_size['w'] }} -c {{ hm_mentat_dev__check_queue_size['c'] }}
+echo -n "INSP A TEMP: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector.py/tmp -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+echo -n "INSP B ERRS: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector-b.py/errors -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+echo -n "INSP B PEND: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector-b.py/pending -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+echo -n "INSP B INCM: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector-b.py/incoming -w {{ hm_mentat_dev__check_queue_size['w'] }} -c {{ hm_mentat_dev__check_queue_size['c'] }}
+echo -n "INSP B TEMP: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-inspector-b.py/tmp -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+echo -n "ENRCH  ERRS: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-enricher.py/errors -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+echo -n "ENRCH  PEND: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-enricher.py/pending -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+echo -n "ENRCH  INCM: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-enricher.py/incoming -w {{ hm_mentat_dev__check_queue_size['w'] }} -c {{ hm_mentat_dev__check_queue_size['c'] }}
+echo -n "ENRCH  TEMP: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-enricher.py/tmp -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+echo -n "STRG   ERRS: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-storage.py/errors -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+echo -n "STRG   PEND: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-storage.py/pending -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}
+echo -n "STRG   INCM: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-storage.py/incoming -w {{ hm_mentat_dev__check_queue_size['w'] }} -c {{ hm_mentat_dev__check_queue_size['c'] }}
+echo -n "STRG   TEMP: "
+/usr/lib/nagios/plugins/check_file_count -d {{ hm_mentat_dev__install_path }}/chroot/var/mentat/spool/mentat-storage.py/tmp -w {{ hm_mentat_dev__check_queue_dirs['w'] }} -c {{ hm_mentat_dev__check_queue_dirs['c'] }}

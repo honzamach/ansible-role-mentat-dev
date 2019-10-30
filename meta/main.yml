@@ -1,0 +1,21 @@
+galaxy_info:
+  role_name: mentat_dev
+  author: Jan Mach
+  description: Ansible role for convenient installation of the Mentat IDS and SIEM system - development version.
+  company: CESNET, a.l.e.
+  license: MIT
+  min_ansible_version: 2.5
+  github_branch: master
+  platforms:
+    - name: Debian
+      versions:
+        - stretch
+        - buster
+  galaxy_tags:
+    - system
+    - monitoring
+    - ids
+    - siem
+
+dependencies:
+  - honzamach.postgresql
