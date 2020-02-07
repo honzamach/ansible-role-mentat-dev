@@ -1,80 +1,47 @@
 ---
 
-#
-# Name of the UNIX system user for Mentat system.
-#
 hm_mentat_dev__user: mentat
 
-#
-# Name of the UNIX system group for Mentat system.
-#
 hm_mentat_dev__group: mentat
 
-#
-# Default URL of the Git repository from which to install Mentat system.
-#
 hm_mentat_dev__repo_url: https://homeproj.cesnet.cz/git/mentat-ng.git/
 
-#
-# Branch to checkout.
-#
 hm_mentat_dev__repo_branch: devel
 
-#
-# Installation path on target hosts, without trailing slash.
-#
 hm_mentat_dev__install_path: /home/mentat/mentat-ng
 
+hm_mentat_dev__install_packages:
+  debian:
+    apt:
+      - git
+      - sudo
+      - adduser
+      - make
+      - build-essential
+      - python3
+      - python3-venv
+      - libpython3-dev
+      - libpq-dev
+      - rrdtool
+      - librrd-dev
+      - libdb5.3
+      - libdb5.3-dev
+      - nodejs
+      - npm
+      - yarn
+      - apache2
+      - libapache2-mod-wsgi-py3
 
-#
-# List of Mentat-related packages, that will be installed on target system.
-#
-hm_mentat_dev__package_list:
-  - git
-  - sudo 
-  - adduser 
-  - make 
-  - build-essential 
-  - python3 
-  - python3-venv 
-  - libpython3-dev 
-  - libpq-dev 
-  - rrdtool 
-  - librrd-dev 
-  - libdb5.3 
-  - libdb5.3-dev 
-  - nodejs
-  - npm
-  - yarn
-  - apache2
-  - libapache2-mod-wsgi-py3
-
-#
-# Location for custom Mentat`s Python virtual environment.
-#
 hm_mentat_dev__python_venv: /home/mentat/mentat-ng/venv
 
-#
-# Enforce the ServerAdmin Apache2 configuration.
-#
 hm_mentat_dev__server_admin:
 
-#
-# Force APT cache update before installing any packages ('yes','no')
-#
 hm_mentat_dev__apt_force_update: no
 
-#
-# Monitoring configuration setting for checking queue size in the *incoming* directory.
-#
 hm_mentat_dev__check_queue_size:
   w: 2000
   c: 5000
 
-#
-# Monitoring configuration setting for checking queue size in other than *incoming*
-# directories.
-#
 hm_mentat_dev__check_queue_dirs:
   w: 100
   c: 1000

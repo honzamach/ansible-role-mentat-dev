@@ -3,31 +3,54 @@
 Role **mentat_dev**
 ================================================================================
 
-Ansible role for convenient installation of the development version of
-`Mentat IDS and SIEM system <https://mentat.cesnet.cz/>`__ directly from source
-Git repository. This type of installation is particularly usefull for
-development/debugging/testing purposes.
+.. note::
+
+    This documentation page and role itself is still work in progress.
 
 * `Ansible Galaxy page <https://galaxy.ansible.com/honzamach/mentat_dev>`__
 * `GitHub repository <https://github.com/honzamach/ansible-role-mentat-dev>`__
 * `Travis CI page <https://travis-ci.org/honzamach/ansible-role-mentat-dev>`__
 
+Ansible role for convenient installation of the development version of
+`Mentat IDS and SIEM system <https://mentat.cesnet.cz/>`__ directly from source
+Git repository. This type of installation is particularly usefull for
+development/debugging/testing purposes.
 
-Description
+**Table of Contents:**
+
+* :ref:`section-role-mentat-dev-installation`
+* :ref:`section-role-mentat-dev-dependencies`
+* :ref:`section-role-mentat-dev-usage`
+* :ref:`section-role-mentat-dev-variables`
+* :ref:`section-role-mentat-dev-files`
+* :ref:`section-role-mentat-dev-author`
+
+This role is part of the `MSMS <https://github.com/honzamach/msms>`__ package.
+Some common features are documented in its :ref:`manual <section-manual>`.
+
+
+.. _section-role-mentat-dev-installation:
+
+Installation
 --------------------------------------------------------------------------------
 
-This role attempts to install the Mentat system directly from source Git repository.
+To install the role `honzamach.mentat_dev <https://galaxy.ansible.com/honzamach/mentat_dev>`__
+from `Ansible Galaxy <https://galaxy.ansible.com/>`__ please use variation of
+following command::
 
-.. note::
+    ansible-galaxy install honzamach.mentat_dev
 
-    This role supports the :ref:`template customization <section-overview-customize-templates>` feature.
+To install the role directly from `GitHub <https://github.com>`__ by cloning the
+`ansible-role-mentat-dev <https://github.com/honzamach/ansible-role-mentat-dev>`__
+repository please use variation of following command::
+
+    git clone https://github.com/honzamach/ansible-role-mentat-dev.git honzamach.mentat_dev
+
+Currently the advantage of using direct Git cloning is the ability to easily update
+the role when new version comes out.
 
 
-Requirements
---------------------------------------------------------------------------------
-
-Python3 with pip3 utility should already be installed on target system.
-
+.. _section-role-mentat-dev-dependencies:
 
 Dependencies
 --------------------------------------------------------------------------------
@@ -37,23 +60,46 @@ This role is dependent on following roles:
 * :ref:`postgresql <section-role-postgresql>`
 * :ref:`geoip <section-role-geoip>`
 
-No other roles have direct dependency on this role.
+No other roles have dependency on this role.
 
 
-Managed files
+.. _section-role-mentat-dev-usage:
+
+Usage
 --------------------------------------------------------------------------------
 
-This role directly manages content of following files on target system:
+Example content of inventory file ``inventory``::
 
-* ``/etc/nagios/nrpe.d/mentat.cfg``
-* ``/opt/system-status/system-status.d/40-mentat``
+    [servers_development]
+    your-server
+
+    [servers_mentat_dev]
+    your-server
+
+Example content of role playbook file ``role_playbook.yml``::
+
+    - hosts: servers_mentat_dev
+      remote_user: root
+      roles:
+        - role: honzamach.mentat_dev
+      tags:
+        - role-mentat-dev
+
+Example usage::
+
+    # Run everything:
+    ansible-playbook --ask-vault-pass --inventory inventory role_playbook.yml
+    ansible-playbook --ask-vault-pass --inventory inventory role_playbook.yml --extra-vars '{"hm_mentat__apt_force_update":"yes"}'
 
 
-Role variables
+.. _section-role-mentat-dev-variables:
+
+Configuration variables
 --------------------------------------------------------------------------------
 
-There are following internal role variables defined in ``defaults/main.yml`` file,
-that can be overriden and adjusted as needed:
+
+Internal role variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. envvar:: hm_mentat_dev__user
 
@@ -90,12 +136,24 @@ that can be overriden and adjusted as needed:
     * *Datatype:* ``string``
     * *Default:* ``/home/mentat/mentat-ng``
 
-.. envvar:: hm_mentat_dev__package_list
+.. envvar:: hm_mentat_dev__install_packages
 
-    List of Mentat-related packages, that will be installed on target system.
+    List of packages defined separately for each linux distribution and package manager,
+    that MUST be present on target system. Any package on this list will be installed on
+    target host. This role currently recognizes only ``apt`` for ``debian``.
 
-    * *Datatype:* ``list of strings``
+    * *Datatype:* ``dict``
     * *Default:* (please see YAML file ``defaults/main.yml``)
+    * *Example:*
+
+    .. code-block:: yaml
+
+        hm_mentat_dev__install_packages:
+          debian:
+            apt:
+              - mentat-ng
+              - ...
+
 
 .. envvar:: hm_mentat_dev__python_venv
 
@@ -126,20 +184,9 @@ that can be overriden and adjusted as needed:
     * *Datatype:* ``dict``
     * *Default:* ``{'w': 100, 'c': 1000}``
 
-Additionally this role makes use of following built-in Ansible variables:
-
-.. envvar:: ansible_lsb['codename']
-
-    Debian distribution codename is used for :ref:`template customization <section-overview-customize-templates>`
-    feature.
-
-.. envvar:: group_names
-
-    See section *Group memberships* below for details.
-
 
 Foreign variables
---------------------------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This role uses following foreign variables defined in other roles:
 
@@ -150,21 +197,17 @@ This role uses following foreign variables defined in other roles:
     system.
 
 
+Built-in Ansible variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. envvar:: ansible_lsb['codename']
+
+    Debian distribution codename is used for :ref:`template customization <section-overview-role-customize-templates>`
+    feature.
+
+
 Group memberships
---------------------------------------------------------------------------------
-
-* **servers-development** or **servers-testing**
-
-  I like to use certain groups for dividing servers according to the service
-  level. Currently following levels are recognized:
-
-  * servers-development
-  * servers-testing
-
-  This role in particular currently recognizes only ``servers-development`` and
-  ``servers-testing`` groups. You may use membership in aforementioned groups
-  to choose which package suite (*development* or *testing*) will be installed
-  on target host.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * **servers_monitored**
 
@@ -177,58 +220,23 @@ Group memberships
   configured for the Mentat system.
 
 
-Installation
+.. _section-role-mentat-dev-files:
+
+Managed files
 --------------------------------------------------------------------------------
 
-To install the role `honzamach.mentat <https://galaxy.ansible.com/honzamach/mentat_dev>`__
-from `Ansible Galaxy <https://galaxy.ansible.com/>`__ please use variation of
-following command::
+This role directly manages content of following files on target system:
 
-    ansible-galaxy install honzamach.mentat_dev
-
-To install the role directly from `GitHub <https://github.com>`__ by cloning the
-`ansible-role-mentat-dev <https://github.com/honzamach/ansible-role-mentat-dev>`__
-repository please use variation of following command::
-
-    git clone https://github.com/honzamach/ansible-role-mentat-dev.git honzamach.mentat_dev
-
-Currently the advantage of using direct Git cloning is the ability to easily update
-the role when new version comes out.
+* ``/etc/nagios/nrpe.d/mentat.cfg`` *[TEMPLATE]*
+* ``/opt/system-status/system-status.d/40-mentat`` *[TEMPLATE]*
 
 
-Example Playbook
+.. _section-role-mentat-dev-author:
+
+Author and license
 --------------------------------------------------------------------------------
 
-Example content of inventory file ``inventory``::
-
-    [servers-development]
-    localhost
-
-    [servers_mentat-dev]
-    localhost
-
-Example content of role playbook file ``playbook.yml``::
-
-    - hosts: servers_mentat_dev
-      remote_user: root
-      roles:
-        - role: honzamach.mentat_dev
-      tags:
-        - role-mentat-dev
-
-Example usage::
-
-    ansible-playbook -i inventory playbook.yml
-    ansible-playbook -i inventory playbook.yml --extra-vars '{"hm_mentat__apt_force_update":"yes"}'
-
-
-License
---------------------------------------------------------------------------------
-
-MIT
-
-
-Author Information
---------------------------------------------------------------------------------
-
-Jan Mach <jan.mach@cesnet.cz>, CESNET, a.l.e.
+| *Copyright:* (C) since 2019 Jan Mach <jan.mach@cesnet.cz>, CESNET, a.l.e.
+| *Author:* Jan Mach <jan.mach@cesnet.cz>, CESNET, a.l.e.
+| Use of this role is governed by the MIT license, see LICENSE file.
+|
