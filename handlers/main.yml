@@ -11,5 +11,5 @@
 
 - name: Restart web server service
   service:
-    name: "{{ hm_mentat_cesnet__webservice_name }}"
+    name: "{{ hm_mentat_dev__webservice_name }}"
     state: restarted
