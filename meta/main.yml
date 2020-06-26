@@ -1,3 +1,4 @@
+---
 galaxy_info:
   role_name: mentat_dev
   author: Jan Mach
@@ -9,8 +10,8 @@ galaxy_info:
   platforms:
     - name: Debian
       versions:
-        - stretch
         - buster
+        - stretch
   galaxy_tags:
     - system
     - monitoring
